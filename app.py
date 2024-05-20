@@ -22,6 +22,7 @@ def list_files():
     try:
         path = request.args.get('path', '')
         abs_path = os.path.join(BASE_DIR, path)
+        logger.info(f"Listing files in {abs_path}")
         if not os.path.exists(abs_path):
             return jsonify({"error": "Path does not exist"}), 404
 
@@ -41,7 +42,8 @@ def list_files():
 def delete_file():
     try:
         data = request.get_json()
-        file_path = os.path.join(BASE_DIR, data['path'])
+        file_path = os.path.join(BASE_DIR, data['path'].lstrip('/'))
+        logger.info(f"Deleting file: {file_path}")
         if os.path.exists(file_path):
             os.remove(file_path)
             return jsonify({"message": "File deleted"}), 200
@@ -54,8 +56,9 @@ def delete_file():
 @app.route('/download', methods=['GET'])
 def download_file():
     try:
-        file_path = request.args.get('path')
+        file_path = request.args.get('path').lstrip('/')
         abs_path = os.path.join(BASE_DIR, file_path)
+        logger.info(f"Downloading file: {abs_path}")
         if os.path.exists(abs_path):
             return send_file(abs_path, as_attachment=True)
         else:
@@ -66,3 +69,4 @@ def download_file():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
+
