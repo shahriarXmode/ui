@@ -4,18 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cloud Shell File Manager</title>
-    <style>
-        li {
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Cloud Shell File Manager</h1>
-    <input type="text" id="path" placeholder="Enter path" />
-    <button onclick="listFiles()">List Files</button>
-    <button onclick="goBack()">Back</button>
-    <ul id="file-list"></ul>
+    <div class="container">
+        <header>
+            <h1>Cloud Shell File Manager</h1>
+        </header>
+        <main>
+            <div class="path-input">
+                <input type="text" id="path" placeholder="Enter path" />
+                <button onclick="listFiles()">List Files</button>
+            </div>
+            <ul id="file-list"></ul>
+        </main>
+        <footer>
+            <p>&copy; 2024 Cloud Shell File Manager</p>
+        </footer>
+    </div>
 
     <script>
         function listFiles() {
@@ -32,21 +38,24 @@
                             const li = document.createElement('li');
                             li.textContent = file.name;
                             if (file.is_dir) {
-                                li.style.fontWeight = 'bold';
-                                li.onclick = () => openFolder(`${path}/${file.name}`.replace(/\/+/g, '/'));
+                                li.classList.add('folder');
+                                li.onclick = () => openFolder(path ? `${path}/${file.name}` : file.name);
                             } else {
+                                li.classList.add('file');
                                 const deleteButton = document.createElement('button');
                                 deleteButton.textContent = 'Delete';
+                                deleteButton.classList.add('btn-delete');
                                 deleteButton.onclick = (e) => {
                                     e.stopPropagation();
-                                    deleteFile(`${path}/${file.name}`.replace(/\/+/g, '/'));
+                                    deleteFile(path ? `${path}/${file.name}` : file.name);
                                 };
 
                                 const downloadButton = document.createElement('button');
                                 downloadButton.textContent = 'Download';
+                                downloadButton.classList.add('btn-download');
                                 downloadButton.onclick = (e) => {
                                     e.stopPropagation();
-                                    downloadFile(`${path}/${file.name}`.replace(/\/+/g, '/'));
+                                    downloadFile(path ? `${path}/${file.name}` : file.name);
                                 };
 
                                 li.appendChild(deleteButton);
@@ -59,14 +68,7 @@
         }
 
         function openFolder(folderPath) {
-            document.getElementById('path').value = folderPath.replace(/\/+/g, '/');
-            listFiles();
-        }
-
-        function goBack() {
-            const currentPath = document.getElementById('path').value;
-            const parentPath = currentPath.split('/').slice(0, -1).join('/');
-            document.getElementById('path').value = parentPath || '/';
+            document.getElementById('path').value = folderPath;
             listFiles();
         }
 
