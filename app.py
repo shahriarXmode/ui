@@ -1,5 +1,6 @@
 import os
 import logging
+import shutil
 from flask import Flask, request, send_file, jsonify, render_template
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -39,18 +40,23 @@ def list_files():
         return jsonify({"error": "Internal Server Error"}), 500
 
 @app.route('/delete', methods=['POST'])
-def delete_file():
+def delete_file_or_folder():
     try:
         data = request.get_json()
         file_path = os.path.join(BASE_DIR, data['path'].lstrip('/'))
-        logger.info(f"Deleting file: {file_path}")
+        logger.info(f"Deleting: {file_path}")
         if os.path.exists(file_path):
-            os.remove(file_path)
-            return jsonify({"message": "File deleted"}), 200
+            if os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+                logger.info(f"Directory deleted: {file_path}")
+            else:
+                os.remove(file_path)
+                logger.info(f"File deleted: {file_path}")
+            return jsonify({"message": "Deleted"}), 200
         else:
-            return jsonify({"error": "File not found"}), 404
+            return jsonify({"error": "File or directory not found"}), 404
     except Exception as e:
-        logger.error(f"Error deleting file: {e}")
+        logger.error(f"Error deleting file or folder: {e}")
         return jsonify({"error": "Internal Server Error"}), 500
 
 @app.route('/download', methods=['GET'])
@@ -69,4 +75,5 @@ def download_file():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080)
+
 
