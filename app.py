@@ -1,6 +1,6 @@
 import os
 import logging
-from flask import Flask, request, send_from_directory, jsonify, render_template
+from flask import Flask, request, send_file, jsonify, render_template
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 BASE_DIR = os.path.expanduser("~")
@@ -55,9 +55,11 @@ def delete_file():
 def download_file():
     try:
         file_path = request.args.get('path')
-        directory = os.path.dirname(file_path)
-        filename = os.path.basename(file_path)
-        return send_from_directory(directory, filename, as_attachment=True)
+        abs_path = os.path.join(BASE_DIR, file_path)
+        if os.path.exists(abs_path):
+            return send_file(abs_path, as_attachment=True)
+        else:
+            return jsonify({"error": "File not found"}), 404
     except Exception as e:
         logger.error(f"Error downloading file: {e}")
         return "Internal Server Error", 500
