@@ -19,23 +19,27 @@
                 .then(data => {
                     const fileList = document.getElementById('file-list');
                     fileList.innerHTML = '';
-                    data.forEach(file => {
-                        const li = document.createElement('li');
-                        li.textContent = file.name;
-                        if (!file.is_dir) {
-                            const deleteButton = document.createElement('button');
-                            deleteButton.textContent = 'Delete';
-                            deleteButton.onclick = () => deleteFile(path + '/' + file.name);
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        data.forEach(file => {
+                            const li = document.createElement('li');
+                            li.textContent = file.name;
+                            if (!file.is_dir) {
+                                const deleteButton = document.createElement('button');
+                                deleteButton.textContent = 'Delete';
+                                deleteButton.onclick = () => deleteFile(path + '/' + file.name);
 
-                            const downloadButton = document.createElement('button');
-                            downloadButton.textContent = 'Download';
-                            downloadButton.onclick = () => downloadFile(path + '/' + file.name);
+                                const downloadButton = document.createElement('button');
+                                downloadButton.textContent = 'Download';
+                                downloadButton.onclick = () => downloadFile(path + '/' + file.name);
 
-                            li.appendChild(deleteButton);
-                            li.appendChild(downloadButton);
-                        }
-                        fileList.appendChild(li);
-                    });
+                                li.appendChild(deleteButton);
+                                li.appendChild(downloadButton);
+                            }
+                            fileList.appendChild(li);
+                        });
+                    }
                 });
         }
 
