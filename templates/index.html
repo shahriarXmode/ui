@@ -17,78 +17,79 @@
     <ul id="file-list"></ul>
 
     <script>
-        function listFiles() {
-            const path = document.getElementById('path').value;
-            fetch(`/files?path=${encodeURIComponent(path)}`)
-                .then(response => response.json())
-                .then(data => {
-                    const fileList = document.getElementById('file-list');
-                    fileList.innerHTML = '';
-                    if (data.error) {
-                        alert(data.error);
-                    } else {
-                        data.forEach(file => {
-                            const li = document.createElement('li');
-                            li.textContent = file.name;
-                            if (file.is_dir) {
-                                li.style.fontWeight = 'bold';
-                                li.onclick = () => openFolder(path + '/' + file.name);
-                            } else {
-                                const deleteButton = document.createElement('button');
-                                deleteButton.textContent = 'Delete';
-                                deleteButton.onclick = (e) => {
-                                    e.stopPropagation();
-                                    deleteFile(path + '/' + file.name);
-                                };
-
-                                const downloadButton = document.createElement('button');
-                                downloadButton.textContent = 'Download';
-                                downloadButton.onclick = (e) => {
-                                    e.stopPropagation();
-                                    downloadFile(path + '/' + file.name);
-                                };
-
-                                li.appendChild(deleteButton);
-                                li.appendChild(downloadButton);
-                            }
-                            fileList.appendChild(li);
-                        });
-                    }
-                });
-        }
-
-        function openFolder(folderPath) {
-            document.getElementById('path').value = folderPath;
-            listFiles();
-        }
-
-        function deleteFile(filePath) {
-            fetch('/delete', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ path: filePath })
-            })
+    function listFiles() {
+        const path = document.getElementById('path').value;
+        fetch(`/files?path=${encodeURIComponent(path)}`)
             .then(response => response.json())
             .then(data => {
-                if (data.message) {
-                    alert(data.message);
-                } else if (data.error) {
+                const fileList = document.getElementById('file-list');
+                fileList.innerHTML = '';
+                if (data.error) {
                     alert(data.error);
+                } else {
+                    data.forEach(file => {
+                        const li = document.createElement('li');
+                        li.textContent = file.name;
+                        if (file.is_dir) {
+                            li.style.fontWeight = 'bold';
+                            li.onclick = () => openFolder(path ? `${path}/${file.name}` : file.name);
+                        } else {
+                            const deleteButton = document.createElement('button');
+                            deleteButton.textContent = 'Delete';
+                            deleteButton.onclick = (e) => {
+                                e.stopPropagation();
+                                deleteFile(path ? `${path}/${file.name}` : file.name);
+                            };
+
+                            const downloadButton = document.createElement('button');
+                            downloadButton.textContent = 'Download';
+                            downloadButton.onclick = (e) => {
+                                e.stopPropagation();
+                                downloadFile(path ? `${path}/${file.name}` : file.name);
+                            };
+
+                            li.appendChild(deleteButton);
+                            li.appendChild(downloadButton);
+                        }
+                        fileList.appendChild(li);
+                    });
                 }
-                listFiles();
             });
-        }
+    }
 
-        function downloadFile(filePath) {
-            window.location.href = `/download?path=${encodeURIComponent(filePath)}`;
-        }
+    function openFolder(folderPath) {
+        document.getElementById('path').value = folderPath;
+        listFiles();
+    }
 
-        // Initialize file listing on page load
-        document.addEventListener('DOMContentLoaded', () => {
+    function deleteFile(filePath) {
+        fetch('/delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ path: filePath })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+            } else if (data.error) {
+                alert(data.error);
+            }
             listFiles();
         });
-    </script>
+    }
+
+    function downloadFile(filePath) {
+        window.location.href = `/download?path=${encodeURIComponent(filePath)}`;
+    }
+
+    // Initialize file listing on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        listFiles();
+    });
+</script>
+
 </body>
 </html>
