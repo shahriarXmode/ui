@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud Shell File Manager</title>
+</head>
+<body>
+    <h1>Cloud Shell File Manager</h1>
+    <input type="text" id="path" placeholder="Enter path" />
+    <button onclick="listFiles()">List Files</button>
+    <ul id="file-list"></ul>
+
+    <script>
+        function listFiles() {
+            const path = document.getElementById('path').value;
+            fetch(`/files?path=${encodeURIComponent(path)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const fileList = document.getElementById('file-list');
+                    fileList.innerHTML = '';
+                    data.forEach(file => {
+                        const li = document.createElement('li');
+                        li.textContent = file.name;
+                        if (!file.is_dir) {
+                            const deleteButton = document.createElement('button');
+                            deleteButton.textContent = 'Delete';
+                            deleteButton.onclick = () => deleteFile(path + '/' + file.name);
+
+                            const downloadButton = document.createElement('button');
+                            downloadButton.textContent = 'Download';
+                            downloadButton.onclick = () => downloadFile(path + '/' + file.name);
+
+                            li.appendChild(deleteButton);
+                            li.appendChild(downloadButton);
+                        }
+                        fileList.appendChild(li);
+                    });
+                });
+        }
+
+        function deleteFile(filePath) {
+            fetch('/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ path: filePath })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                listFiles();
+            });
+        }
+
+        function downloadFile(filePath) {
+            window.location.href = `/download?path=${encodeURIComponent(filePath)}`;
+        }
+    </script>
+</body>
+</html>
