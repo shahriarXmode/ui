@@ -33,20 +33,20 @@
                             li.textContent = file.name;
                             if (file.is_dir) {
                                 li.style.fontWeight = 'bold';
-                                li.onclick = () => openFolder(path ? `${path}/${file.name}` : file.name);
+                                li.onclick = () => openFolder(`${path}/${file.name}`.replace(/\/+/g, '/'));
                             } else {
                                 const deleteButton = document.createElement('button');
                                 deleteButton.textContent = 'Delete';
                                 deleteButton.onclick = (e) => {
                                     e.stopPropagation();
-                                    deleteFile(path ? `${path}/${file.name}` : file.name);
+                                    deleteFile(`${path}/${file.name}`.replace(/\/+/g, '/'));
                                 };
 
                                 const downloadButton = document.createElement('button');
                                 downloadButton.textContent = 'Download';
                                 downloadButton.onclick = (e) => {
                                     e.stopPropagation();
-                                    downloadFile(path ? `${path}/${file.name}` : file.name);
+                                    downloadFile(`${path}/${file.name}`.replace(/\/+/g, '/'));
                                 };
 
                                 li.appendChild(deleteButton);
@@ -59,7 +59,7 @@
         }
 
         function openFolder(folderPath) {
-            document.getElementById('path').value = folderPath;
+            document.getElementById('path').value = folderPath.replace(/\/+/g, '/');
             listFiles();
         }
 
