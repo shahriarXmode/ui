@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cloud Shell File Manager</title>
+    <style>
+        li {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <h1>Cloud Shell File Manager</h1>
@@ -25,14 +30,23 @@
                         data.forEach(file => {
                             const li = document.createElement('li');
                             li.textContent = file.name;
-                            if (!file.is_dir) {
+                            if (file.is_dir) {
+                                li.style.fontWeight = 'bold';
+                                li.onclick = () => openFolder(path + '/' + file.name);
+                            } else {
                                 const deleteButton = document.createElement('button');
                                 deleteButton.textContent = 'Delete';
-                                deleteButton.onclick = () => deleteFile(path + '/' + file.name);
+                                deleteButton.onclick = (e) => {
+                                    e.stopPropagation();
+                                    deleteFile(path + '/' + file.name);
+                                };
 
                                 const downloadButton = document.createElement('button');
                                 downloadButton.textContent = 'Download';
-                                downloadButton.onclick = () => downloadFile(path + '/' + file.name);
+                                downloadButton.onclick = (e) => {
+                                    e.stopPropagation();
+                                    downloadFile(path + '/' + file.name);
+                                };
 
                                 li.appendChild(deleteButton);
                                 li.appendChild(downloadButton);
@@ -41,6 +55,11 @@
                         });
                     }
                 });
+        }
+
+        function openFolder(folderPath) {
+            document.getElementById('path').value = folderPath;
+            listFiles();
         }
 
         function deleteFile(filePath) {
@@ -53,7 +72,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);
+                if (data.message) {
+                    alert(data.message);
+                } else if (data.error) {
+                    alert(data.error);
+                }
                 listFiles();
             });
         }
@@ -61,7 +84,11 @@
         function downloadFile(filePath) {
             window.location.href = `/download?path=${encodeURIComponent(filePath)}`;
         }
+
+        // Initialize file listing on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            listFiles();
+        });
     </script>
 </body>
 </html>
-
